@@ -13,7 +13,7 @@ namespace RelocalizationLogic
         static void Main(string[] args)
         {
             var groundTruth = new GroundTruth();
-            groundTruth.GenerateLayout(100);
+            groundTruth.GenerateLayout(40);
 
             var agentA = new Agent();
             var agentB = new Agent();
@@ -22,12 +22,12 @@ namespace RelocalizationLogic
 
             foreach (var item in groundTruth.Items)
             {
-                if(random.NextDouble() > .5)
+                //if(random.NextDouble() > .5)
                 {
-                    agentA.Push(item);
+                    agentA.Push(item.Clone());
                 }
 
-                if (random.NextDouble() > .5)
+                //if (random.NextDouble() > .5)
                 {
                     agentB.Push(item);
                 }

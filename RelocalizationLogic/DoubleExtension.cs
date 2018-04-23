@@ -110,5 +110,10 @@ namespace RelocalizationLogic
             long diff = Math.Abs(longA - longB);
             return diff <= maxUlps;
         }
+
+        public static double Sqrd(this double val)
+        {
+            return val * val;
+        }
     }
 }

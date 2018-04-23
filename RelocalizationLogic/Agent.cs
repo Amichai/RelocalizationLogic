@@ -14,11 +14,6 @@ namespace RelocalizationLogic
             seenObjects = new List<ObjectPosition>();
         }
 
-        public Vector3 Transform(Vector3 worldPosition)
-        {
-            return Vector3.Origin;
-        }
-
         private List<ObjectPosition> seenObjects;
         public IReadOnlyCollection<ObjectPosition> SeenObjects => seenObjects;
 
@@ -27,6 +22,11 @@ namespace RelocalizationLogic
         internal void Push(ObjectPosition item)
         {
             seenObjects.Add(item);
+        }
+
+        public List<ObjectPosition> Transform(Matrix4x4 matrix)
+        {
+            return seenObjects.Select(i => i.Transform(matrix)).ToList();
         }
     }
 }

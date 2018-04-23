@@ -23,11 +23,27 @@ namespace RelocalizationLogic
         private Vector4 row3;
         private Vector4 row4;
 
-        private Matrix4x4(List<double> values)
+        public Matrix4x4 AdjustWeight(double diff, int index)
+        {
+            var clone = new Matrix4x4(this.values.ToList());
+
+            clone.values[index] += diff;
+
+            clone.InitializeRowsAndColumns();
+
+            return clone;
+        }
+
+        public Matrix4x4(List<double> values)
         {
             Debug.Assert(values.Count == 16);
 
             this.values = values;
+            InitializeRowsAndColumns();
+        }
+
+        private void InitializeRowsAndColumns()
+        {
             row1 = new Vector4(values[0], values[1], values[2], values[3]);
             row2 = new Vector4(values[4], values[5], values[6], values[7]);
             row3 = new Vector4(values[8], values[9], values[10], values[11]);
@@ -39,6 +55,8 @@ namespace RelocalizationLogic
             column4 = new Vector4(row1[3], row2[3], row3[3], row4[3]);
         }
 
+        private static Dictionary<string, string> results = new Dictionary<string, string>();
+
         public static Vector3 operator *(Matrix4x4 m1, Vector3 v1)
         {
             var v4 = Vector4.FromVector3(v1);
@@ -47,8 +65,20 @@ namespace RelocalizationLogic
             var a3 = m1.row3 * v4;
             var a4 = m1.row4 * v4;
 
-            System.Diagnostics.Debug.Assert(a4 == 1);
-                
+            Debug.Assert(m1.values[0] == m1.row1[0]);
+
+            Debug.Assert(a4 == 1);
+
+            //var key = $"{a1},{a2},{a3},{v1.X},{v1.Y},{v1.Z}";
+
+            //if (!results.ContainsKey(key))
+            //{
+            //    results[key] = m1.ToString();
+            //} else
+            //{
+            //    Debug.Assert(results[key] == m1.ToString());
+            //}
+
             ///Assert a4 == 1
             return new Vector3(a1, a2, a3);
         }
@@ -61,6 +91,11 @@ namespace RelocalizationLogic
         public static Matrix4x4 RandomProjection()
         {
             return new Matrix4x4(Enumerable.Concat(Enumerable.Range(0, 12).Select(i => RandomComponent()), new List<double> {0, 0, 0, 1}).ToList());
+        }
+
+        public override string ToString()
+        {
+            return string.Join(",", values);
         }
     }
 }
