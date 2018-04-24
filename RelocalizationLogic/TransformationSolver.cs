@@ -41,23 +41,23 @@ namespace RelocalizationLogic
 
             Debug.Print($"Before after: {d1}, {d2}");
 
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    searchRadius -= 10;
+            for (int i = 0; i < 4; i++)
+            {
+                searchRadius -= 10;
 
-            //    Debug.Print($"--- Index: {i}, search radius: {searchRadius}");
+                Debug.Print($"--- Index: {i}, search radius: {searchRadius}");
 
-            //    result.SetValueFunc(m => Value(m, searchRadius));
+                result.SetValueFunc(m => Value(m, searchRadius));
 
-            //    result = ga.Run(result, maxIter, minDistance);
+                result = ga.Run(result, maxIter, minDistance);
 
-            //    var d2 = MatchDistance(result.matrix);
+                d2 = MatchDistance(result.matrix);
 
-            //    Debug.Print($"Before after: {d1}, {d2}");
-            //}
+                Debug.Print($"Before after: {d1}, {d2}");
+            }
 
-            ///Validate the results
-            
+            /// Validate the results
+
         }
 
         private double MatchDistance(Matrix4x4 matrix)
@@ -65,19 +65,29 @@ namespace RelocalizationLogic
 
 
             var objectsA = a.Transform(matrix);
-            var objectsB = a.SeenObjects;
+            var objectsB = b.SeenObjects;
+
+            ////var objectsA = a.Transform(matrix);
+            ////var objectsB = a.SeenObjects;
+
             ///For each object in A,
             ///ask if there is a corresponding object within our distance tolerance
             ///
             var totalDistance = 0d;
             foreach (var obj in objectsB)
             {
-                var match = objectsA.Single(i => i.Id == obj.Id);
-                var distance = match.Position.Distance(obj.Position);
+                ObjectPosition? match = objectsA.SingleOrDefault(i => i.Id == obj.Id);
 
-                //Debug.Print($"{distance}");
+                if(match == null)
+                {
+                    continue;
+                }
 
-                totalDistance += distance.Sqrd();
+                var distance = match?.Position.Distance(obj.Position);
+
+                Debug.Print($"{distance}");
+
+                totalDistance += distance.Value.Sqrd();
             }
 
             return totalDistance;
@@ -85,23 +95,6 @@ namespace RelocalizationLogic
 
         private MatchDistance Value(Matrix4x4 matrix, int searchRadius)
         {
-            ///for each agent
-            ///for each seen object
-            ///check the distance between that seen object and the nearest one seen by agent b
-            ///if that object doesn't exist -> don't penalize
-            ///if that object does exist, it's not necessarily the same object
-            ///
-            /// Define a matching criteria (variable like temp), count the number of matches that we can achieve
-            ///
-
-            ///try to transform a objects to b
-            ///for each object, check for a match. count the number of matches (and square the distances)
-            ///
-
-            //Debug.Print($"Matrix: {matrix.ToString()}");
-
-            var objectsA1 = a.SeenObjects;
-
             var objectsA = a.Transform(matrix);
             var objectsB = b.SeenObjects;
 
@@ -133,6 +126,11 @@ namespace RelocalizationLogic
         private bool IsMatch(ObjectPosition search, IList<ObjectPosition> searchSpace, double distanceTolerance, out double matchDistance)
         {
             matchDistance = 0;
+            if(!searchSpace.Any(i => i.Value == search.Value))
+            {
+                return false;
+            }
+
             var canditates = searchSpace.Where(i => i.Value == search.Value);
 
             var bestMatch = canditates.OrderBy(i => i.Position.Distance(search.Position)).First();

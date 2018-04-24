@@ -20,14 +20,16 @@ namespace RelocalizationLogic
 
             var solver = new TransformationSolver(agentA, agentB);
 
+            var addThreshold = .5;
+
             foreach (var item in groundTruth.Items)
             {
-                //if(random.NextDouble() > .5)
+                if (random.NextDouble() < addThreshold)
                 {
                     agentA.Push(item.Clone());
                 }
 
-                //if (random.NextDouble() > .5)
+                if (random.NextDouble() < addThreshold)
                 {
                     agentB.Push(item);
                 }
