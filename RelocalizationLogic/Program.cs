@@ -12,6 +12,24 @@ namespace RelocalizationLogic
 
         static void Main(string[] args)
         {
+
+            RealData();
+            ///Place n strings in 3d space
+            ///randomly select a string and stream to client a or b
+            ///transform to two local coordinate systems
+            ///calculate the transform given sets of the strings 
+        }
+
+        private static void RealData()
+        {
+            var agentA = Agent.ParseFromFile(@"..\..\Session1.txt");
+            var agentB = Agent.ParseFromFile(@"..\..\Session2.txt");
+            var solver = new TransformationSolver(agentA, agentB);
+            solver.Solve();
+        }
+
+        private static void SimulatedData()
+        {
             var groundTruth = new GroundTruth();
             groundTruth.GenerateLayout(40);
 
@@ -36,11 +54,6 @@ namespace RelocalizationLogic
             }
 
             solver.Solve();
-
-            ///Place n strings in 3d space
-            ///randomly select a string and stream to client a or b
-            ///transform to two local coordinate systems
-            ///calculate the transform given sets of the strings 
         }
     }
 }

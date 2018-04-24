@@ -33,13 +33,20 @@ namespace RelocalizationLogic
 
             int searchRadius = 60;
 
-            var d1 = MatchDistance(randomMatrix);
+            //var d1 = MatchDistance(randomMatrix);
 
-            var result = ga.Run(new PerturbableTransformationMatrix(randomMatrix, m => Value(m, searchRadius)), maxIter, minDistance);
+            var d1  = Value(randomMatrix, searchRadius, out var initialDistance);
+            Debug.Print($"Initial: {d1.MatchCount}: {initialDistance}");
 
-            var d2 = MatchDistance(result.matrix);
 
-            Debug.Print($"Before after: {d1}, {d2}");
+            var result = ga.Run(new PerturbableTransformationMatrix(randomMatrix, m => Value(m, searchRadius, out var dist)), maxIter, minDistance);
+
+            //var d2 = MatchDistance(result.matrix);
+
+            //Debug.Print($"Before after: {d1}, {d2}");
+
+            d1 = Value(result.matrix, searchRadius, out initialDistance);
+            Debug.Print($"Next: {d1.MatchCount}: {initialDistance}");
 
             for (int i = 0; i < 4; i++)
             {
@@ -47,13 +54,16 @@ namespace RelocalizationLogic
 
                 Debug.Print($"--- Index: {i}, search radius: {searchRadius}");
 
-                result.SetValueFunc(m => Value(m, searchRadius));
+                result.SetValueFunc(m => Value(m, searchRadius, out var dist));
 
                 result = ga.Run(result, maxIter, minDistance);
 
-                d2 = MatchDistance(result.matrix);
+                //d2 = MatchDistance(result.matrix);
 
-                Debug.Print($"Before after: {d1}, {d2}");
+                //Debug.Print($"Before after: {d1}, {d2}");
+
+                d1 = Value(result.matrix, searchRadius, out initialDistance);
+                Debug.Print($"Next: {d1.MatchCount}: {initialDistance}");
             }
 
             /// Validate the results
@@ -62,8 +72,6 @@ namespace RelocalizationLogic
 
         private double MatchDistance(Matrix4x4 matrix)
         {
-
-
             var objectsA = a.Transform(matrix);
             var objectsB = b.SeenObjects;
 
@@ -93,22 +101,17 @@ namespace RelocalizationLogic
             return totalDistance;
         }
 
-        private MatchDistance Value(Matrix4x4 matrix, int searchRadius)
+
+
+
+        private MatchDistance Value(Matrix4x4 matrix, int searchRadius, out double totalDistance)
         {
             var objectsA = a.Transform(matrix);
             var objectsB = b.SeenObjects;
 
-            //Debug.Print($"{string.Join(",", objectsA.Select(i => i.Position.X.ToString()))}");
-            //Debug.Print($"{string.Join(",", objectsA.Select(i => i.Position.Y.ToString()))}");
-            //Debug.Print($"{string.Join(",", objectsA.Select(i => i.Position.Z.ToString()))}");
-
-            //Debug.Print($"{string.Join(",", objectsB.Select(i => i.Position.X.ToString()))}");
-
             int matchCount = 0;
 
             var matchDistance = 0d;
-            ///For each object in A,
-            ///ask if there is a corresponding object within our distance tolerance
             foreach(var obj in objectsB)
             {
                 if(IsMatch(obj, objectsA, searchRadius, out double distance))
@@ -118,7 +121,7 @@ namespace RelocalizationLogic
                 }
             }
 
-            //Debug.Print($"{matchDistance}");
+            totalDistance = matchDistance;
 
             return new MatchDistance(matchCount, 100000 / matchDistance);
         }
